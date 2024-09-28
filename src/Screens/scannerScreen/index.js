@@ -1,28 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { Text, View, Button, StyleSheet } from 'react-native';
-import { BarCodeScanner } from 'expo-barcode-scanner';
-import styles from './styles';
+import React, { useState, useEffect } from "react";
+import { Text, View, Button } from "react-native";
+import { Camera, CameraView } from 'expo-camera';
+import styles from './styles'; 
+import HomeIndicator from "../../components/Home Indicator";
+import { StatusBar } from "expo-status-bar"; 
 
-const ScannerScreen = ({ navigation }) => {
+export default function ScannerScreen() {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
+    const getCameraPermissions = async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === "granted");
+    };
+
+    getCameraPermissions();
   }, []);
 
-  const handleBarCodeScanned = ({ type, data }) => {
+  const handleBarcodeScanned = ({ type, data }) => {
     setScanned(true);
     alert(`Bar code with type ${type} and data ${data} has been scanned!`);
-    // You can navigate to a different screen or handle the scanned data here
-    navigation.goBack(); // Optional: Go back to the previous screen
-  };
+  }
 
   if (hasPermission === null) {
-    return <Text>Requesting for camera permission...</Text>;
+    return <Text>Requesting for camera permission</Text>;
   }
   if (hasPermission === false) {
     return <Text>No access to camera</Text>;
@@ -30,12 +32,24 @@ const ScannerScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <BarCodeScanner
-        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-        style={StyleSheet.absoluteFillObject}
+       <StatusBar backgroundColor="#F7572C" style="light" />
+
+       <View style={styles.topMargin} />
+      <CameraView
+        onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
+        barcodeScannerSettings={{
+          barcodeTypes: ["qr", "pdf417"],
+        }}
+        style={styles.cameraView}
       />
-      {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />}
+              <View style={styles.scanBox} />
+      {scanned && (
+        <Button title={"Tap to Scan Again"} onPress={() => setScanned(false)} />
+      )}
+      <View style={styles.bottomMargin}>
+        <HomeIndicator />
+      </View>
     </View>
   );
-};
-export default ScannerScreen;
+}
+

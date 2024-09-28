@@ -33,7 +33,8 @@ const App = () => {
         />
         <Stack.Screen
           name="ScannerScreen"
-          component={ScannerScreen} />
+          component={ScannerScreen}
+          options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
